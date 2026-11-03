@@ -1,0 +1,19 @@
+{
+  "pods": [
+    { "id": "pod1", "capacidad": 100, "probFallo": 0.01 },
+    { "id": "pod2", "capacidad": 100, "probFallo": 0.01 },
+    { "id": "pod3", "capacidad": 80,  "probFallo": 0.02 },
+    { "id": "pod4", "capacidad": 120, "probFallo": 0.01 }
+  ],
+  "dependencias": [
+    { "id": "D", "pods": ["pod1", "pod2"], "probFallo": 0.001 }
+  ],
+  "aristas": [
+    { "origen": "pod1", "destino": "pod2", "peso": 4 },
+    { "origen": "pod1", "destino": "pod3", "peso": 7 },
+    { "origen": "pod2", "destino": "pod3", "peso": 3 },
+    { "origen": "pod2", "destino": "pod4", "peso": 6 },
+    { "origen": "pod3", "destino": "pod4", "peso": 5 },
+    { "origen": "pod1", "destino": "pod4", "peso": 9 }
+  ]
+}

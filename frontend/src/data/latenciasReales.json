@@ -1,0 +1,6 @@
+[
+  { "n": 100,  "latencia": 12 },
+  { "n": 500,  "latencia": 48 },
+  { "n": 1000, "latencia": 95 },
+  { "n": 5000, "latencia": 520 }
+]
