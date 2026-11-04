@@ -1,20 +1,41 @@
-// ============================================================
-// calibracion.js — Ajuste de a, b y f(n) con datos reales
-// ============================================================
-// ENTRADAS : latenciasReales: [{ n, latencia }], parámetros iniciales
-// SALIDA   : { a, b, c, error }  (f(n) = c·n por ejemplo)
-//
-// PASOS
-// 1. Definir el error: error cuadrático medio entre T(n) simulado y la latencia real.
-// 2. Probar una malla de valores (a, b, c) y quedarse con el que dé menor error.
-// 3. Definir la tolerancia (por ejemplo, error < 10 %) para la decisión "¿coincide con la latencia real?".
-// 4. Devolver los parámetros ajustados y el error, para volver a calcular T(n).
-// 5. Anotar en el informe de dónde salen los datos "reales" (medidos o simulados).
+// calibracion.js — Ajuste de a, b y c comparando con latencias reales
+import { calcularT } from './recurrencia.js'
+import { funcionF } from './metricas.js'
 
+// Error porcentual absoluto medio entre el modelo y las latencias reales.
 export function errorModelo(params, latenciasReales) {
-  // TODO
+  const f = funcionF(params)
+  const memo = new Map()
+  let suma = 0
+  for (const r of latenciasReales) {
+    const t = calcularT(r.n, params.a, params.b, f, params.T1, memo)
+    suma += Math.abs(t - r.latencia) / r.latencia
+  }
+  return suma / latenciasReales.length
 }
 
-export function calibrar(latenciasReales, paramsIniciales, tolerancia) {
-  // TODO
+// Busca en una malla los valores de a, b y c con menor error.
+export function calibrar(latenciasReales, paramsIniciales, tolerancia = 0.1) {
+  const errorInicial = errorModelo(paramsIniciales, latenciasReales)
+  let mejor = { ...paramsIniciales, error: errorInicial }
+  const valoresA = [1, 2, 3, 4]
+  const valoresB = [1.5, 2, 3, 4]
+  const valoresC = Array.from({ length: 80 }, (_, i) => 0.0005 * Math.pow(1.09, i))
+  for (const a of valoresA) {
+    for (const b of valoresB) {
+      for (const c of valoresC) {
+        const p = { ...paramsIniciales, a, b, c }
+        const error = errorModelo(p, latenciasReales)
+        if (error < mejor.error) mejor = { ...p, error }
+      }
+    }
+  }
+  return {
+    a: mejor.a,
+    b: mejor.b,
+    c: +mejor.c.toPrecision(3),
+    error: mejor.error,
+    errorInicial,
+    coincide: mejor.error <= tolerancia,
+  }
 }

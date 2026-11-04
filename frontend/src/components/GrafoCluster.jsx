@@ -1,16 +1,50 @@
-// ============================================================
-// GrafoCluster.jsx — Dibujo del clúster y del árbol de menor latencia
-// ============================================================
-// PROPS : nodos, aristas, arbol (aristas del árbol de expansión mínima)
-//
-// PASOS
-// 1. Crear un div contenedor y obtener una referencia con useRef.
-// 2. En useEffect, iniciar Cytoscape con los nodos y las aristas (la etiqueta de la arista es la latencia).
-// 3. Estilo: aristas del árbol en un color resaltado y las demás en gris.
-// 4. Elegir un layout (por ejemplo, "circle" o "cose").
-// 5. Destruir la instancia en la función de limpieza del useEffect.
-// 6. Volver a dibujar cuando cambien nodos, aristas o arbol.
+import { useEffect, useRef } from 'react'
+import cytoscape from 'cytoscape'
 
 export default function GrafoCluster({ nodos, aristas, arbol }) {
-  return <div>{/* TODO */}</div>
+  const contenedor = useRef(null)
+
+  useEffect(() => {
+    const enArbol = new Set(arbol.map((e) => `${e.origen}-${e.destino}`))
+    const cy = cytoscape({
+      container: contenedor.current,
+      elements: [
+        ...nodos.map((id) => ({ data: { id } })),
+        ...aristas.map((e) => ({
+          data: { id: `${e.origen}-${e.destino}`, source: e.origen, target: e.destino, etiqueta: `${e.peso} ms` },
+          classes: enArbol.has(`${e.origen}-${e.destino}`) ? 'arbol' : '',
+        })),
+      ],
+      style: [
+        {
+          selector: 'node',
+          style: {
+            label: 'data(id)', 'text-valign': 'center', color: '#fff', 'font-size': 11,
+            'background-color': '#2563eb', width: 42, height: 42,
+          },
+        },
+        {
+          selector: 'edge',
+          style: {
+            label: 'data(etiqueta)', 'font-size': 10, color: '#6b7280', width: 1.5,
+            'line-color': '#cbd5e1', 'text-background-color': '#fff', 'text-background-opacity': 1,
+            'text-background-padding': 2, 'curve-style': 'bezier',
+          },
+        },
+        { selector: 'edge.arbol', style: { 'line-color': '#16a34a', width: 4, color: '#166534' } },
+      ],
+      layout: { name: 'circle', padding: 30 },
+      userZoomingEnabled: false,
+    })
+    return () => cy.destroy()
+  }, [nodos, aristas, arbol])
+
+  return (
+    <div>
+      <div ref={contenedor} className="grafo" />
+      <p className="nota">
+        <span className="leyenda verde" /> Árbol de expansión mínima <span className="leyenda gris" /> Otras conexiones
+      </p>
+    </div>
+  )
 }
